@@ -71,7 +71,7 @@
     <mesh name="right_wrist_bearing_plate_visual" file="../assemblies/right_arm_umi/meshes/right_wrist_bearing_plate_visual.stl"/>
   </asset>
   <worldbody>
-    <body name="torso" pos="0 0 0.33605" quat="1 0 0 0">
+    <body name="torso" pos="0.5 0 0.33605" quat="1 0 0 0">
       <inertial pos="-0.00261802 -0.00333892 0.0654266" quat="1.0 0.0 0.0 0.0" mass="1.08507" diaginertia="2.83944e-03 2.26091e-03 2.29963e-03"/>
       <freejoint/>
       <geom type="mesh" rgba="0.638662 0.790426 0.895919 1" mesh="torso_visual" class="visual"/>

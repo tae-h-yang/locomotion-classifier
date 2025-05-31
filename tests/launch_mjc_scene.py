@@ -5,8 +5,18 @@ import mujoco.viewer
 # Load the model with the XML that includes your <camera name="head_cam" ... />
 this_dir = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(
-    this_dir, "descriptions", "toddlerbot", "toddlerbot_table_scene.xml"
+    this_dir,
+    "..",
+    "descriptions",
+    "toddlerbot",
+    "toddlerbot_data_collection_scene_01.xml",
 )
+### Robosuite
+# file_path = os.path.join(
+#     this_dir,
+#     "..",
+#     "descriptions/robosuite/robosuite/models/assets/arenas/empty_arena.xml",
+# )
 model = mujoco.MjModel.from_xml_path(file_path)
 data = mujoco.MjData(model)
 
