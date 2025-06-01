@@ -3,6 +3,7 @@ import numpy as np
 import mujoco
 import mujoco.viewer
 import glfw
+from scipy.spatial.transform import Rotation as R
 
 
 class ToddlerbotSimulator:
@@ -24,15 +25,18 @@ class ToddlerbotSimulator:
         self.JOINT_MOVE_STEPS = int(self.JOINT_MOVE_DURATION / self.model.opt.timestep)
         self.joint_motion_queue = []
 
-        # Key mappings
+        # Key mappings: updated LEFT/RIGHT to rotate body instead of translate
         self.KEY_MOVES = {
-            glfw.KEY_UP: np.array([1, 0, 0]),
-            glfw.KEY_DOWN: np.array([-1, 0, 0]),
-            glfw.KEY_LEFT: np.array([0, 1, 0]),
-            glfw.KEY_RIGHT: np.array([0, -1, 0]),
-            glfw.KEY_E: np.array([0, 0, 1]),
-            glfw.KEY_R: np.array([0, 0, -1]),
+            glfw.KEY_UP: np.array([1, 0, 0]),  # Forward
+            glfw.KEY_DOWN: np.array([-1, 0, 0]),  # Backward
+            glfw.KEY_LEFT: "turn_left",  # Rotate left
+            glfw.KEY_RIGHT: "turn_right",  # Rotate right
+            glfw.KEY_E: np.array([0, 0, 1]),  # Up
+            glfw.KEY_R: np.array([0, 0, -1]),  # Down
         }
+
+        # Rotation angle per turn (in radians)
+        self.ROTATION_ANGLE = np.deg2rad(10)  # 10 degree turns
 
         self._init_joint_indices()
 
@@ -55,7 +59,30 @@ class ToddlerbotSimulator:
 
     def key_callback(self, key):
         if key in self.KEY_MOVES:
-            self.motion_queue.append((self.KEY_MOVES[key], self.MOVE_STEPS))
+            move = self.KEY_MOVES[key]
+            if isinstance(move, str):
+                # Extract current orientation as quaternion
+                quat = self.data.qpos[3:7]
+                rot = R.from_quat([quat[1], quat[2], quat[3], quat[0]])  # wxyz → xyzw
+
+                # Apply Z-axis rotation
+                if move == "turn_left":
+                    delta_rot = R.from_euler("z", self.ROTATION_ANGLE)
+                elif move == "turn_right":
+                    delta_rot = R.from_euler("z", -self.ROTATION_ANGLE)
+
+                new_rot = delta_rot * rot
+                new_quat = new_rot.as_quat()  # xyzw
+
+                # Store back in wxyz format
+                self.data.qpos[3:7] = [
+                    new_quat[3],
+                    new_quat[0],
+                    new_quat[1],
+                    new_quat[2],
+                ]
+            else:
+                self.motion_queue.append((move, self.MOVE_STEPS))
         elif key in self.JOINT_KEYS:
             joint_idx, direction = self.JOINT_KEYS[key]
             delta = direction * self.JOINT_MOVE_AMOUNT
@@ -63,8 +90,18 @@ class ToddlerbotSimulator:
 
     def _apply_base_motion(self, current_motion):
         direction, steps_left = current_motion
-        step_move = direction * self.VELOCITY * self.model.opt.timestep
+
+        # Get current orientation (quat wxyz → scipy xyzw)
+        quat = self.data.qpos[3:7]
+        rot = R.from_quat([quat[1], quat[2], quat[3], quat[0]])
+
+        # Rotate the direction vector into world frame
+        world_direction = rot.apply(direction)
+
+        # Compute and apply world-frame movement
+        step_move = world_direction * self.VELOCITY * self.model.opt.timestep
         self.data.qpos[:3] += step_move
+
         return (direction, steps_left - 1) if steps_left > 1 else None
 
     def _apply_joint_motion(self, joint_motion):
