@@ -12,14 +12,14 @@ class ToddlerbotSimulator:
         self.model.opt.gravity[:] = 0
 
         # Base motion parameters
-        self.MOVE_DISTANCE = 0.05
+        self.MOVE_DISTANCE = 0.1
         self.MOVE_DURATION = 0.05
         self.MOVE_STEPS = int(self.MOVE_DURATION / self.model.opt.timestep)
         self.VELOCITY = self.MOVE_DISTANCE / self.MOVE_DURATION
         self.motion_queue = []
 
         # Joint motion parameters
-        self.JOINT_MOVE_AMOUNT = 0.2
+        self.JOINT_MOVE_AMOUNT = 0.4
         self.JOINT_MOVE_DURATION = 0.05
         self.JOINT_MOVE_STEPS = int(self.JOINT_MOVE_DURATION / self.model.opt.timestep)
         self.joint_motion_queue = []
