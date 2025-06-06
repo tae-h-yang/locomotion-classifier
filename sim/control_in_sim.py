@@ -141,7 +141,7 @@ class ToddlerbotSimulator:
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.path.abspath(__file__))
     xml_path = os.path.join(
-        this_dir, "../descriptions/toddlerbot/toddlerbot_data_collection_scene_01.xml"
+        this_dir, "../descriptions/toddlerbot/toddlerbot_data_collection_scene_test.xml"
     )
     sim = ToddlerbotSimulator(xml_path)
     sim.run()

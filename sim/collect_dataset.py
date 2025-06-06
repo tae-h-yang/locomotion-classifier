@@ -11,7 +11,7 @@ from sim.control_in_sim import ToddlerbotSimulator
 RES_X, RES_Y = 640, 480
 os.environ["MUJOCO_GL"] = "glfw"
 this_path = os.path.dirname(os.path.abspath(__file__))
-output_dir = os.path.join(this_path, "../data/videos")
+output_dir = os.path.join(this_path, "../data/videos/original_videos")
 os.makedirs(output_dir, exist_ok=True)
 
 timestamp = datetime.now().strftime("%m%d%H%M")  # MonthDateHourMinute
@@ -66,7 +66,9 @@ def main():
     SAVE_INTERVAL = 0.01  # Save frame every 0.2 seconds of simulation time
     last_save_time = 0.0
 
-    print("Control the robot using keyboard. Video will be saved to ../data/videos/")
+    print(
+        "Control the robot using keyboard. Video will be saved to ../data/videos/original_videos"
+    )
     with mujoco.viewer.launch_passive(
         sim.model, sim.data, key_callback=sim.key_callback
     ) as viewer:
@@ -98,7 +100,7 @@ def main():
 
     rgb_writer.release()
     depth_writer.release()
-    print("Recording complete. Files saved to ../data/videos/")
+    print("Recording complete. Files saved to ../data/videos/original_videos")
 
 
 if __name__ == "__main__":
